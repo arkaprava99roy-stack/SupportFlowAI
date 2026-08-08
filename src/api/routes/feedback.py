@@ -29,7 +29,7 @@ def submit_feedback(
         user_id=current_user.id,
         rating=req.rating.lower(),
         comment=req.comment,
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.datetime.now(datetime.timezone.utc),
     )
     db.add(feedback_record)
     db.commit()

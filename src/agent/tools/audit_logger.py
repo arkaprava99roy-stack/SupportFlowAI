@@ -26,7 +26,7 @@ def log_tool_execution(
             arguments=serialized_args,
             result_status=result_status,
             result_summary=result_summary[:500],
-            created_at=datetime.datetime.utcnow(),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(audit_entry)
         db.commit()

@@ -142,7 +142,7 @@ def cancel_order(
 
         # Execute cancellation mutation
         order.status = "CANCELLED"
-        order.updated_at = datetime.datetime.utcnow()
+        order.updated_at = datetime.datetime.now(datetime.timezone.utc)
         db.commit()
 
         summary = f"Successfully cancelled order '{normalized_id}' for user '{user_id}' with full refund of ${order.total_amount:.2f}."

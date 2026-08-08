@@ -68,7 +68,7 @@ def seed_database() -> None:
         db.commit()
 
         logger.info("Seeding orders...")
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         orders = [
             # user_demo orders
             Order(id="ORD-1001", order_number="ORD-1001", user_id="user_demo", product_id="prod_101", product_name="Pro Wireless Noise-Cancelling Headphones", status="PROCESSING", total_amount=299.99, carrier="FedEx", tracking_number="FX-PENDING-1001", shipping_address="742 Evergreen Terrace, Springfield, IL 62704", created_at=now - datetime.timedelta(hours=4)),

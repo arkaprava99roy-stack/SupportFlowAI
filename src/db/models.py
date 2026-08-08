@@ -39,8 +39,8 @@ class Conversation(Base):
     id = Column(String(100), primary_key=True)  # e.g. conv_uuid
     user_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
     title = Column(String(200), default="New Conversation")
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User", back_populates="conversations")
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at")
@@ -58,7 +58,7 @@ class Message(Base):
     citations = Column(Text, nullable=True)  # Serialized JSON list of citations
     is_escalated = Column(Boolean, default=False)
     ticket_id = Column(String(50), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     conversation = relationship("Conversation", back_populates="messages")
 
@@ -88,8 +88,8 @@ class Order(Base):
     carrier = Column(String(50), default="FedEx")
     tracking_number = Column(String(100), nullable=True)
     shipping_address = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User", back_populates="orders")
     product = relationship("Product")
@@ -107,8 +107,8 @@ class Ticket(Base):
     status = Column(String(30), default="OPEN")  # OPEN, PENDING_REVIEW, RESOLVED, CLOSED
     category = Column(String(50), default="GENERAL")
     assigned_to = Column(String(100), default="support_tier1")
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User", back_populates="tickets")
 
@@ -122,7 +122,7 @@ class Feedback(Base):
     user_id = Column(String(50), ForeignKey("users.id"), nullable=False)
     rating = Column(String(20), nullable=False)  # thumbs_up, thumbs_down
     comment = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User", back_populates="feedback")
 
@@ -140,7 +140,7 @@ class PendingReview(Base):
     ai_recommended_action = Column(Text, nullable=False)
     status = Column(String(30), default="PENDING")  # PENDING, APPROVED, REJECTED, RESOLVED
     reviewer_notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 
 class ToolAuditLog(Base):

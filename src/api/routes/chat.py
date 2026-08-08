@@ -49,8 +49,8 @@ def send_chat_message(
             id=conv_id,
             user_id=current_user.id,
             title=title_summary,
-            created_at=datetime.datetime.utcnow(),
-            updated_at=datetime.datetime.utcnow(),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
+            updated_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(conversation)
         db.commit()
@@ -62,7 +62,7 @@ def send_chat_message(
         conversation_id=conv_id,
         sender="user",
         content=req.message,
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.datetime.now(datetime.timezone.utc),
     )
     db.add(user_msg)
     db.commit()
@@ -102,7 +102,7 @@ def send_chat_message(
 
     # 5. Persist Assistant Response
     assistant_msg_id = f"msg_{uuid.uuid4().hex[:10]}"
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     assistant_msg = Message(
         id=assistant_msg_id,
         conversation_id=conv_id,
@@ -175,8 +175,8 @@ def stream_chat_message(
             id=conv_id,
             user_id=current_user.id,
             title=title_summary,
-            created_at=datetime.datetime.utcnow(),
-            updated_at=datetime.datetime.utcnow(),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
+            updated_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(conversation)
         db.commit()
@@ -188,7 +188,7 @@ def stream_chat_message(
         conversation_id=conv_id,
         sender="user",
         content=req.message,
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.datetime.now(datetime.timezone.utc),
     )
     db.add(user_msg)
     db.commit()

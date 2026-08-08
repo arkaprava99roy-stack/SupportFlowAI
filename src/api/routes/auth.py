@@ -39,7 +39,7 @@ def register_user(req: UserRegisterRequest, db: Session = Depends(get_db)):
         name=req.name,
         role="customer",
         status="active",
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.datetime.now(datetime.timezone.utc),
     )
     db.add(new_user)
     db.commit()

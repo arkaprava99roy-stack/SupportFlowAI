@@ -42,7 +42,7 @@ def create_support_ticket(
             status="OPEN" if priority != "HIGH" else "PENDING_REVIEW",
             category=category.upper(),
             assigned_to="security_team" if category == "SECURITY" else "support_tier1",
-            created_at=datetime.datetime.utcnow(),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(ticket)
         db.commit()
@@ -60,7 +60,7 @@ def create_support_ticket(
                 user_message=description,
                 ai_recommended_action="Emergency account review: verify unauthorized access, reset auth credentials, initiate owner verification.",
                 status="PENDING",
-                created_at=datetime.datetime.utcnow(),
+                created_at=datetime.datetime.now(datetime.timezone.utc),
             )
             db.add(review)
             db.commit()
@@ -109,7 +109,7 @@ def enqueue_pending_review(
             user_message=user_message,
             ai_recommended_action=ai_recommended_action,
             status="PENDING",
-            created_at=datetime.datetime.utcnow(),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(review)
         db.commit()
