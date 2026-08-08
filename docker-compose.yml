@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database with Persistent Storage
+  postgres:
+    image: postgres:16-alpine
+    container_name: supportflow_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-supportflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-supportflow_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-supportflow_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supportflow -d supportflow_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - supportflow_network
+
+  # 2. FastAPI Backend & LangGraph Multi-Agent Core
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: supportflow_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://supportflow:supportflow_pass@postgres:5432/supportflow_db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-supportflow_super_secret_jwt_key_2026_production}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL_NAME=gpt-4o-mini
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - supportflow_network
+
+  # 3. React + Vite + Tailwind Frontend (Nginx Alpine)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: supportflow_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - supportflow_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  supportflow_network:
+    driver: bridge

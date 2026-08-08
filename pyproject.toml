@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supportflow-ai"
+version = "0.1.0"
+description = "SupportFlow AI — Portfolio-grade, Agentic Customer Support Platform"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "langgraph>=0.2.0",
+    "langchain>=0.2.0",
+    "langchain-core>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "langchain-community>=0.2.0",
+    "langchain-text-splitters>=0.2.0",
+    "faiss-cpu>=1.8.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.0.0",
+    "ruff>=0.4.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
