@@ -36,22 +36,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface-100 border border-slate-700/80 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="glass rounded-3xl border border-white/10 w-full max-w-4xl shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] bg-[#0d121c]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50 bg-surface-200/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-semibold text-white tracking-tight">Admin & Human-in-the-Loop Inspector</h3>
-              <p className="text-xs text-slate-400">Escalated review queue and compliance audit trail</p>
+              <p className="text-xs text-slate-400 font-mono">Escalated review queue and compliance audit trail</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
