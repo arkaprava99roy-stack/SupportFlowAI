@@ -69,11 +69,29 @@ INTENT_KEYWORDS: Dict[IntentType, List[str]] = {
 }
 
 
+# Priority tiebreaker: when two intents tie or are close in score,
+# the one with the higher priority index wins for multi-intent queries.
+INTENT_PRIORITY: Dict[str, int] = {
+    "SECURITY": 100,
+    "TECHNICAL_SUPPORT": 80,
+    "ACCOUNT": 70,
+    "SHIPPING": 65,
+    "REFUND": 60,
+    "BILLING": 55,
+    "PRODUCT_INFO": 40,
+    "GENERAL": 10,
+}
+
+# Multi-intent signal words — indicate a compound query; prefer the first-
+# mentioned or higher-priority intent rather than whichever keyword is longest.
+MULTI_INTENT_SIGNALS = ["and also", "and see", "as well as", "also", "additionally", " and "]
+
+
 def rule_based_intent_classifier(text: str) -> IntentClassificationResult:
-    """Deterministic keyword-based intent classifier for fallback & testing."""
+    """Deterministic keyword-based intent classifier with multi-intent scoring."""
     text_lower = text.lower()
 
-    # Prioritize SECURITY checks first
+    # SECURITY always wins — non-negotiable safety check
     for keyword in INTENT_KEYWORDS["SECURITY"]:
         if keyword in text_lower:
             return IntentClassificationResult(
@@ -82,31 +100,51 @@ def rule_based_intent_classifier(text: str) -> IntentClassificationResult:
                 reason=f"Matched high-priority security keyword: '{keyword}'",
             )
 
-    # Prioritize TECHNICAL_SUPPORT errors before general payment checkout terms
-    for kw in INTENT_KEYWORDS["TECHNICAL_SUPPORT"]:
-        if kw in text_lower:
-            return IntentClassificationResult(
-                intent="TECHNICAL_SUPPORT",
-                confidence=0.95,
-                reason=f"Matched technical support keyword: '{kw}'",
-            )
+    # Score every remaining intent by counting keyword hits
+    scores: Dict[str, int] = {intent: 0 for intent in INTENT_KEYWORDS if intent != "SECURITY"}
+    matched_keywords: Dict[str, list] = {intent: [] for intent in scores}
 
-    # Check other intent categories
     for intent, keywords in INTENT_KEYWORDS.items():
-        if intent in ("SECURITY", "TECHNICAL_SUPPORT"):
+        if intent == "SECURITY":
             continue
         for kw in keywords:
             if kw in text_lower:
-                return IntentClassificationResult(
-                    intent=intent,
-                    confidence=0.92,
-                    reason=f"Matched keyword: '{kw}'",
-                )
+                scores[intent] += 1
+                matched_keywords[intent].append(kw)
+
+    # Determine if this is a compound / multi-intent query
+    is_multi_intent = any(signal in text_lower for signal in MULTI_INTENT_SIGNALS)
+
+    # Find winner: highest score; on tie, use priority map
+    best_intent = "GENERAL"
+    best_score = 0
+    for intent, score in scores.items():
+        if score > best_score:
+            best_score = score
+            best_intent = intent
+        elif score == best_score and score > 0:
+            # Tiebreak: prefer higher-priority intent
+            if INTENT_PRIORITY.get(intent, 0) > INTENT_PRIORITY.get(best_intent, 0):
+                best_intent = intent
+
+    if best_score == 0:
+        return IntentClassificationResult(
+            intent="GENERAL",
+            confidence=0.70,
+            reason="No specific category keywords matched.",
+        )
+
+    # For multi-intent queries, boost confidence of the winning category
+    confidence = min(0.96, 0.88 + (best_score * 0.03)) if is_multi_intent else min(0.96, 0.85 + (best_score * 0.04))
+    kws = ", ".join(matched_keywords[best_intent][:3])
+    reason = f"Matched {best_score} keyword(s): '{kws}'"
+    if is_multi_intent:
+        reason += " [multi-intent query — primary intent selected by priority]"
 
     return IntentClassificationResult(
-        intent="GENERAL",
-        confidence=0.70,
-        reason="No specific category keywords matched.",
+        intent=best_intent,
+        confidence=round(confidence, 3),
+        reason=reason,
     )
 
 

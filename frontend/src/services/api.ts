@@ -106,7 +106,8 @@ export const api = {
     conversationId: string | undefined,
     onToken: (token: string) => void,
     onMetadata: (metadata: any) => void,
-    onError: (err: string) => void
+    onError: (err: string) => void,
+    onProgress?: (node: string, label: string) => void,
   ) {
     const token = getAuthToken();
     const headers: Record<string, string> = {
@@ -159,11 +160,12 @@ export const api = {
               const parsed = JSON.parse(dataStr);
               if (currentEvent === 'metadata') {
                 onMetadata(parsed);
+              } else if (currentEvent === 'progress' && onProgress) {
+                onProgress(parsed.node, parsed.label);
               } else if (parsed.token) {
                 onToken(parsed.token);
               }
             } catch (e) {
-              // Plain token string
               if (dataStr) onToken(dataStr);
             }
           }

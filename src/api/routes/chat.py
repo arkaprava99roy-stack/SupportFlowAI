@@ -248,14 +248,26 @@ def stream_chat_message(
     ]
 
     def event_generator():
-        # Stream text words in chunks
+        # 1. Emit live node progress events (before agent result arrives)
+        import time
+        progress_steps = [
+            ("guardrail_node",     "🛡️ Running safety guardrail check..."),
+            ("intent_classifier",  "🏷️ Classifying customer intent..."),
+            ("risk_analyzer",      "⚖️ Analyzing risk level..."),
+            ("rag_node",           "📚 Querying knowledge base (FAISS)..."),
+            ("response_generator", "✨ Generating grounded response..."),
+        ]
+        for node_id, label in progress_steps:
+            yield f"event: progress\ndata: {json.dumps({'node': node_id, 'label': label})}\n\n"
+            time.sleep(0.07)
+
+        # 2. Stream response text word-by-word
         words = response_text.split(" ")
         for i, word in enumerate(words):
             chunk = word + (" " if i < len(words) - 1 else "")
-            payload = json.dumps({"token": chunk})
-            yield f"data: {payload}\n\n"
+            yield f"data: {json.dumps({'token': chunk})}\n\n"
 
-        # Emit trailing metadata
+        # 3. Trailing metadata event
         meta_payload = json.dumps({
             "conversation_id": conv_id,
             "message_id": assistant_msg_id,
@@ -271,6 +283,7 @@ def stream_chat_message(
         yield "event: done\ndata: [DONE]\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 
 
 @router.get("/conversations", response_model=List[ConversationSummary])

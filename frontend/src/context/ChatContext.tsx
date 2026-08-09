@@ -10,6 +10,8 @@ interface ChatContextType {
   isStreaming: boolean;
   streamingContent: string;
   activeCitations: Citation[];
+  activeNode: string | null;
+  activeNodeLabel: string | null;
   error: string | null;
   loadConversations: () => Promise<void>;
   selectConversation: (id: string) => Promise<void>;
@@ -29,6 +31,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [streamingContent, setStreamingContent] = useState<string>('');
   const [activeCitations, setActiveCitations] = useState<Citation[]>([]);
+  const [activeNode, setActiveNode] = useState<string | null>(null);
+  const [activeNodeLabel, setActiveNodeLabel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const loadConversations = async () => {
@@ -67,6 +71,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMessages([]);
     setStreamingContent('');
     setActiveCitations([]);
+    setActiveNode(null);
+    setActiveNodeLabel(null);
     setError(null);
   };
 
@@ -98,6 +104,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsStreaming(true);
     setStreamingContent('');
     setActiveCitations([]);
+    setActiveNode(null);
+    setActiveNodeLabel(null);
 
     let accumulatedTokens = '';
 
@@ -107,6 +115,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (token) => {
         accumulatedTokens += token;
         setStreamingContent((prev) => prev + token);
+        // Clear active node once tokens start flowing
+        setActiveNode(null);
+        setActiveNodeLabel(null);
       },
       (metadata) => {
         if (metadata.conversation_id && !activeConversationId) {
@@ -132,6 +143,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
       async (err) => {
         // Fallback to batch chat endpoint if streaming encountered a network issue
+
         try {
           const batchRes = await api.sendChatMessage(text, activeConversationId || undefined);
           if (!activeConversationId) {
@@ -158,6 +170,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsStreaming(false);
           setStreamingContent('');
         }
+      },
+      // onProgress — handle live node execution events
+      (node: string, label: string) => {
+        setActiveNode(node);
+        setActiveNodeLabel(label);
       }
     );
   };
@@ -189,6 +206,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isStreaming,
         streamingContent,
         activeCitations,
+        activeNode,
+        activeNodeLabel,
         error,
         loadConversations,
         selectConversation,
