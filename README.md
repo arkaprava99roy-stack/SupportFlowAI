@@ -260,7 +260,6 @@ python -m src.rag.ingest
 python server.py
 ```
 
-Swagger API docs → `http://localhost:8000/docs`
 
 ### 2. Frontend — React 18 + Vite + Tailwind
 
@@ -270,7 +269,6 @@ npm install
 npm run dev
 ```
 
-Frontend dev server → `http://localhost:5173`
 
 ### 3. Quick Tip: Start Both Together
 
