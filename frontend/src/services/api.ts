@@ -125,6 +125,11 @@ export const api = {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          removeAuthToken();
+          window.dispatchEvent(new Event('auth:unauthorized'));
+          throw new Error('Session expired. Please log in again.');
+        }
         const errorData = await response.json().catch(() => ({ detail: 'Streaming failed' }));
         throw new Error(errorData.detail || 'Streaming failed');
       }

@@ -84,6 +84,10 @@ export const App: React.FC = () => {
   }
 
   // Console Mode Layout
+  if (!isAuthenticated) {
+    return <AuthScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-200 flex flex-col justify-between overflow-x-hidden relative selection:bg-teal-500/30 selection:text-teal-200">
       {/* Conversation History Sidebar */}
